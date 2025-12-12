@@ -2,8 +2,8 @@
 
 Plateforme de génération de documents juridiques avec assistance IA, workflow de validation et gestion multi-organisations.
 
-![Symfony](https://img.shields.io/badge/Symfony-7.2-purple?logo=symfony)
-![PHP](https://img.shields.io/badge/PHP-8.3-blue?logo=php)
+![Symfony](https://img.shields.io/badge/Symfony-7.4-purple?logo=symfony)
+![PHP](https://img.shields.io/badge/PHP-8.4-blue?logo=php)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.0-38B2AC?logo=tailwind-css)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)
@@ -40,8 +40,8 @@ Plateforme de génération de documents juridiques avec assistance IA, workflow 
 
 | Composant | Technologie |
 |-----------|-------------|
-| Framework | Symfony 7.2 |
-| PHP | 8.3 |
+| Framework | Symfony 7.4 |
+| PHP | 8.4 |
 | Base de données | PostgreSQL 16 |
 | Cache | Redis |
 | Queue | RabbitMQ |
