@@ -1,0 +1,236 @@
+{% extends 'layout/app.html.twig' %}
+
+{% block title %}Document #{{ document.id }}
+	- Legal Docs Generator
+{% endblock %}
+{% block page_title %}Document #{{ document.id }}
+{% endblock %}
+
+{% block content %}
+	<div class="mb-6 flex justify-between items-center">
+		<a href="{{ path('app_document_index') }}" class="text-gray-600 hover:text-gray-900">
+			← Retour aux documents
+		</a>
+
+		{% set statusColors = {
+        'draft': 'bg-gray-100 text-gray-800',
+        'review': 'bg-yellow-100 text-yellow-800',
+        'approved': 'bg-green-100 text-green-800',
+        'signed': 'bg-blue-100 text-blue-800',
+        'archived': 'bg-purple-100 text-purple-800'
+    } %}
+		{% set statusLabels = {
+        'draft': 'Brouillon',
+        'review': 'En revue',
+        'approved': 'Approuvé',
+        'signed': 'Signé',
+        'archived': 'Archivé'
+    } %}
+		<span class="px-3 py-1 text-sm rounded-full {{ statusColors[document.status] }}">
+			{{ statusLabels[document.status] }}
+		</span>
+	</div>
+
+	<div
+		class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+		<!-- Contenu principal -->
+		<div class="lg:col-span-2 space-y-6">
+			<div class="bg-white rounded-lg shadow p-6">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Contenu généré</h3>
+				<div class="prose max-w-none bg-gray-50 p-6 rounded border">
+					<pre class="whitespace-pre-wrap font-serif text-sm leading-relaxed">{{ document.generatedContent }}</pre>
+				</div>
+			</div>
+
+			<!-- Panneau IA -->
+			<div class="bg-white rounded-lg shadow p-6" data-controller="ai" data-ai-document-id-value="{{ document.id }}">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+					<svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+					</svg>
+					Assistant IA
+				</h3>
+
+				<!-- Actions IA -->
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+					<button data-action="ai#improve" data-ai-tone-param="formel" class="p-3 cursor-pointer text-sm rounded-lg transition text-center {{ document.status == 'draft' ? 'bg-purple-50 text-purple-700 hover:bg-purple-100' : 'bg-gray-100 text-gray-400 cursor-not-allowed' }}" {{ document.status != 'draft' ? 'disabled' : '' }}>
+						<svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+						</svg>
+						Améliorer
+					</button>
+
+					<button data-action="ai#reformulate" data-ai-style-param="simple" class="p-3 cursor-pointer text-sm rounded-lg transition text-center {{ document.status == 'draft' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'bg-gray-100 text-gray-400 cursor-not-allowed' }}" {{ document.status != 'draft' ? 'disabled' : '' }}>
+						<svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+						</svg>
+						Simplifier
+					</button>
+
+					<button data-action="ai#summarize" class="p-3 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-center cursor-pointer">
+						<svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+						</svg>
+						Résumer
+					</button>
+
+					<button data-action="ai#check" class="p-3 text-sm bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition text-center cursor-pointer">
+						<svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+						Vérifier
+					</button>
+				</div>
+
+				{% if document.status != 'draft' %}
+					<p class="text-xs text-gray-500 mb-4">
+						💡 Les modifications IA ne sont disponibles que pour les brouillons. "Résumer" et "Vérifier" restent accessibles.
+					</p>
+				{% endif %}
+
+				<!-- Loading -->
+				<div data-ai-target="loading" class="hidden">
+					<div class="flex items-center justify-center py-8">
+						<svg class="animate-spin h-8 w-8 text-purple-600" fill="none" viewbox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						<span class="ml-3 text-gray-600">Analyse en cours...</span>
+					</div>
+				</div>
+
+				<!-- Résultat -->
+				<div data-ai-target="result" class="hidden">
+					<div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+						<h4 class="font-medium text-purple-900 mb-2">Suggestion de l'IA</h4>
+						<pre data-ai-content class="whitespace-pre-wrap text-sm text-purple-800 font-sans"></pre>
+					</div>
+				</div>
+
+				<!-- Actions sur le résultat -->
+				{% if document.status == 'draft' %}
+					<div data-ai-target="actions" class="hidden mt-4 flex gap-3">
+						<button data-action="ai#applyChanges" class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition cursor-pointer">
+							Appliquer les modifications
+						</button>
+						<button data-action="ai#cancelChanges" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition cursor-pointer">
+							Annuler
+						</button>
+					</div>
+				{% endif %}
+			</div>
+
+			<!-- Données remplies -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Données du document</h3>
+				<dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+					{% for key, value in document.dataJson %}
+						<div class="bg-gray-50 p-3 rounded">
+							<dt class="text-gray-500 text-xs uppercase">{{ key|replace({'_': ' '}) }}</dt>
+							<dd class="font-medium text-gray-900 mt-1">{{ value ?: '-' }}</dd>
+						</div>
+					{% endfor %}
+				</dl>
+			</div>
+		</div>
+
+		<!-- Sidebar -->
+		<div
+			class="space-y-6">
+			<!-- Infos -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Informations</h3>
+				<dl class="space-y-3 text-sm">
+					<div>
+						<dt class="text-gray-500">Template</dt>
+						<dd class="font-medium">
+							<a href="{{ path('app_template_show', {id: document.template.id}) }}" class="text-indigo-600 hover:text-indigo-900">
+								{{ document.template.name }}
+							</a>
+						</dd>
+					</div>
+					<div>
+						<dt class="text-gray-500">Créé par</dt>
+						<dd class="font-medium">{{ document.createdBy.name }}</dd>
+					</div>
+					<div>
+						<dt class="text-gray-500">Créé le</dt>
+						<dd class="font-medium">{{ document.createdAt|date('d/m/Y H:i') }}</dd>
+					</div>
+					{% if document.updatedAt %}
+						<div>
+							<dt class="text-gray-500">Modifié le</dt>
+							<dd class="font-medium">{{ document.updatedAt|date('d/m/Y H:i') }}</dd>
+						</div>
+					{% endif %}
+					{% if document.organization %}
+						<div>
+							<dt class="text-gray-500">Organisation</dt>
+							<dd class="font-medium">{{ document.organization.name }}</dd>
+						</div>
+					{% endif %}
+				</dl>
+			</div>
+
+			<!-- Actions -->
+			<div class="bg-white rounded-lg shadow p-6 space-y-3">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+
+				{% if is_granted('edit', document) %}
+					{% if document.status == 'draft' %}
+						<a href="{{ path('app_document_edit', {id: document.id}) }}" class="block w-full text-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+							Modifier
+						</a>
+						<a href="{{ path('app_document_status', {id: document.id, status: 'review'}) }}" class="block w-full text-center bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition">
+							Soumettre pour revue
+						</a>
+					{% endif %}
+
+					{% if document.status == 'review' %}
+						<a href="{{ path('app_document_status', {id: document.id, status: 'draft'}) }}" class="block w-full text-center bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">
+							Retour en brouillon
+						</a>
+						{% if is_granted('ROLE_VALIDATOR') or is_granted('ROLE_ADMIN_ORG') %}
+							<a href="{{ path('app_document_status', {id: document.id, status: 'approved'}) }}" class="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+								Approuver
+							</a>
+						{% endif %}
+					{% endif %}
+
+					{% if document.status == 'approved' %}
+						<a href="{{ path('app_document_status', {id: document.id, status: 'review'}) }}" class="block w-full text-center bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition">
+							Remettre en revue
+						</a>
+						<a href="{{ path('app_document_status', {id: document.id, status: 'signed'}) }}" class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+							Marquer comme signé
+						</a>
+					{% endif %}
+
+					{% if document.status == 'signed' %}
+						<a href="{{ path('app_document_status', {id: document.id, status: 'archived'}) }}" class="block w-full text-center bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition">
+							Archiver
+						</a>
+					{% endif %}
+
+					{% if document.status == 'draft' %}
+						<form action="{{ path('app_document_delete', {id: document.id}) }}" method="post" onsubmit="return confirm('Supprimer ce document ?')">
+							<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+							<button type="submit" class="w-full text-center bg-red-100 text-red-700 px-4 py-2 rounded-md hover:bg-red-200 transition cursor-pointer">
+								Supprimer
+							</button>
+						</form>
+					{% endif %}
+				{% endif %}
+
+				<div class="flex gap-2 pt-2">
+					<a href="{{ path('app_document_pdf_view', {id: document.id}) }}" target="_blank" class="flex-1 text-center bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition">
+						Voir PDF
+					</a>
+					<a href="{{ path('app_document_pdf', {id: document.id}) }}" class="flex-1 text-center bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition">
+						Télécharger
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

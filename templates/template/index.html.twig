@@ -1,0 +1,57 @@
+{% extends 'layout/app.html.twig' %}
+
+{% block title %}Templates - Legal Docs Generator{% endblock %}
+{% block page_title %}Templates{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <p class="text-gray-600">{{ templates|length }} template(s) disponible(s)</p>
+    {% if is_granted('ROLE_EDITOR') %}
+        <a href="{{ path('app_template_new') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+            + Nouveau template
+        </a>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for template in templates %}
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900">{{ template.name }}</h3>
+                    <span class="px-2 py-1 text-xs rounded-full {{ template.visibility == 'global' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                        {{ template.visibility == 'global' ? 'Global' : 'Privé' }}
+                    </span>
+                </div>
+                
+                {% if template.description %}
+                    <p class="text-gray-600 text-sm mb-4">{{ template.description|slice(0, 100) }}{% if template.description|length > 100 %}...{% endif %}</p>
+                {% endif %}
+                
+                <div class="text-xs text-gray-500 mb-4">
+                    <span>v{{ template.version }}</span>
+                    <span class="mx-2">•</span>
+                    <span>{{ template.variablesJson|default([])|length }} variable(s)</span>
+                    <span class="mx-2">•</span>
+                    <span>{{ template.createdAt|date('d/m/Y') }}</span>
+                </div>
+                
+                <div class="flex gap-2">
+                    <a href="{{ path('app_template_show', {id: template.id}) }}" class="flex-1 text-center bg-gray-100 text-gray-700 px-3 py-2 rounded hover:bg-gray-200 transition text-sm">
+                        Voir
+                    </a>
+                    {% if is_granted('edit', template) %}
+                        <a href="{{ path('app_template_edit', {id: template.id}) }}" class="flex-1 text-center bg-indigo-100 text-indigo-700 px-3 py-2 rounded hover:bg-indigo-200 transition text-sm">
+                            Modifier
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-span-full text-center py-12 text-gray-500">
+            Aucun template disponible.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    
+    # Sessions avec Redis
+    session:
+        handler_id: '%env(REDIS_URL)%'
+        cookie_secure: auto
+        cookie_samesite: lax
+        storage_factory_id: session.storage.factory.native
+    
+    # Cache avec Redis
+    cache:
+        default_redis_provider: '%env(REDIS_URL)%'
+        pools:
+            doctrine.result_cache_pool:
+                adapter: cache.adapter.redis
+            doctrine.system_cache_pool:
+                adapter: cache.adapter.redis
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

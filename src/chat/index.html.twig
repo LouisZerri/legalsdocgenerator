@@ -1,0 +1,260 @@
+{% extends 'layout/app.html.twig' %}
+
+{% block title %}Assistant IA - Legal Docs Generator{% endblock %}
+{% block page_title %}Assistant IA{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col" style="height: calc(100vh - 200px);">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">Assistant Juridique IA</h3>
+                    <p class="text-sm text-gray-500" id="ai-status">Vérification...</p>
+                </div>
+            </div>
+            <button onclick="clearChat()" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Message de bienvenue -->
+            <div class="flex items-start">
+                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3 max-w-[80%]">
+                    <p class="text-gray-800">Bonjour ! Je suis votre assistant juridique IA. Je peux vous aider à :</p>
+                    <ul class="mt-2 text-gray-700 text-sm space-y-1">
+                        <li>• Rédiger des clauses contractuelles</li>
+                        <li>• Expliquer des termes juridiques</li>
+                        <li>• Répondre à vos questions sur le droit des affaires</li>
+                        <li>• Améliorer vos documents légaux</li>
+                    </ul>
+                    <p class="mt-2 text-gray-800">Comment puis-je vous aider ?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="px-6 py-4 border-t border-gray-100">
+            <form id="chat-form" class="flex items-center space-x-3">
+                <input type="text" id="chat-input" 
+                    placeholder="Posez votre question..." 
+                    class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    autocomplete="off">
+                <button type="submit" id="send-btn" 
+                    class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="send-text">Envoyer</span>
+                    <svg id="send-loading" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="mt-4 flex flex-wrap gap-2">
+        <button onclick="askQuestion('Comment rédiger une clause de confidentialité ?')" 
+            class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-50 transition">
+            Clause de confidentialité
+        </button>
+        <button onclick="askQuestion('Quelles sont les mentions obligatoires dans un contrat de travail ?')" 
+            class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-50 transition">
+            Contrat de travail
+        </button>
+        <button onclick="askQuestion('Explique-moi la différence entre obligation de moyens et de résultat')" 
+            class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-50 transition">
+            Obligations juridiques
+        </button>
+        <button onclick="askQuestion('Comment protéger ma propriété intellectuelle ?')" 
+            class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-50 transition">
+            Propriété intellectuelle
+        </button>
+    </div>
+</div>
+
+<script>
+let chatHistory = [];
+const messagesContainer = document.getElementById('chat-messages');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+const sendText = document.getElementById('send-text');
+const sendLoading = document.getElementById('send-loading');
+const aiStatus = document.getElementById('ai-status');
+
+// Vérifier le statut de l'IA
+async function checkStatus() {
+    try {
+        const response = await fetch('{{ path('app_chat_status') }}');
+        const data = await response.json();
+        if (data.available) {
+            aiStatus.textContent = 'En ligne';
+            aiStatus.classList.add('text-green-600');
+        } else {
+            aiStatus.textContent = 'Hors ligne';
+            aiStatus.classList.add('text-red-600');
+        }
+    } catch (e) {
+        aiStatus.textContent = 'Hors ligne';
+        aiStatus.classList.add('text-red-600');
+    }
+}
+
+// Ajouter un message au chat
+function addMessage(content, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex items-start' + (isUser ? ' justify-end' : '');
+    
+    if (isUser) {
+        messageDiv.innerHTML = `
+            <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-4 py-3 max-w-[80%]">
+                <p>${escapeHtml(content)}</p>
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div class="bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3 max-w-[80%]">
+                <p class="text-gray-800 whitespace-pre-wrap">${escapeHtml(content)}</p>
+            </div>
+        `;
+    }
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Ajouter un indicateur de chargement
+function addLoadingIndicator() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = 'loading-indicator';
+    loadingDiv.className = 'flex items-start';
+    loadingDiv.innerHTML = `
+        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div class="bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3">
+            <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+            </div>
+        </div>
+    `;
+    messagesContainer.appendChild(loadingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function removeLoadingIndicator() {
+    const loading = document.getElementById('loading-indicator');
+    if (loading) loading.remove();
+}
+
+// Envoyer un message
+async function sendMessage(message) {
+    if (!message.trim()) return;
+    
+    // Ajouter le message utilisateur
+    addMessage(message, true);
+    chatHistory.push({ role: 'user', content: message });
+    
+    // UI loading
+    sendBtn.disabled = true;
+    sendText.classList.add('hidden');
+    sendLoading.classList.remove('hidden');
+    chatInput.value = '';
+    addLoadingIndicator();
+    
+    try {
+        const response = await fetch('{{ path('app_chat_send') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                message: message,
+                history: chatHistory.slice(-10) // Garder les 10 derniers messages
+            })
+        });
+        
+        const data = await response.json();
+        removeLoadingIndicator();
+        
+        if (data.success) {
+            addMessage(data.response, false);
+            chatHistory.push({ role: 'assistant', content: data.response });
+        } else {
+            addMessage('Désolé, une erreur est survenue. Veuillez réessayer.', false);
+        }
+    } catch (e) {
+        removeLoadingIndicator();
+        addMessage('Erreur de connexion. Vérifiez que l\'IA est en ligne.', false);
+    }
+    
+    // Reset UI
+    sendBtn.disabled = false;
+    sendText.classList.remove('hidden');
+    sendLoading.classList.add('hidden');
+    chatInput.focus();
+}
+
+// Effacer le chat
+function clearChat() {
+    chatHistory = [];
+    messagesContainer.innerHTML = `
+        <div class="flex items-start">
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div class="bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3 max-w-[80%]">
+                <p class="text-gray-800">Conversation effacée. Comment puis-je vous aider ?</p>
+            </div>
+        </div>
+    `;
+}
+
+// Question rapide
+function askQuestion(question) {
+    chatInput.value = question;
+    sendMessage(question);
+}
+
+// Escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Event listeners
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendMessage(chatInput.value);
+});
+
+// Init
+checkStatus();
+</script>
+{% endblock %}

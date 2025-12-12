@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ document.template.name }}</title>
+    <style>
+        @page {
+            margin: 1.5cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.8;
+            color: #333;
+            padding: 20px 25px;
+        }
+
+        .container {
+            max-width: 100%;
+        }
+
+        /* ============ HEADER ============ */
+        .header {
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header table {
+            width: 100%;
+        }
+
+        .brand {
+            font-size: 28pt;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .brand-tagline {
+            font-size: 9pt;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .doc-info {
+            text-align: right;
+            font-size: 9pt;
+            color: #666;
+        }
+
+        .doc-ref {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #4f46e5;
+            margin-bottom: 5px;
+        }
+
+        /* ============ WATERMARK ============ */
+        .watermark {
+            position: fixed;
+            top: 35%;
+            left: 10%;
+            font-size: 80pt;
+            color: #f0f0f0;
+            transform: rotate(-40deg);
+            font-weight: bold;
+            letter-spacing: 10px;
+            z-index: -1;
+        }
+
+        /* ============ INFO CARD ============ */
+        .info-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #4f46e5;
+            padding: 20px 25px;
+            margin-bottom: 40px;
+        }
+
+        .info-card-title {
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #4f46e5;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-card table {
+            width: 100%;
+        }
+
+        .info-card td {
+            padding: 8px 0;
+            font-size: 10pt;
+        }
+
+        .info-label {
+            color: #666;
+            width: 40%;
+            font-weight: bold;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 9pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-draft { background: #e9ecef; color: #495057; }
+        .status-review { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-signed { background: #cce5ff; color: #004085; }
+        .status-archived { background: #e2d9f3; color: #6f42c1; }
+
+        /* ============ DOCUMENT BODY ============ */
+        .document-body {
+            padding: 20px 10px;
+        }
+
+        h1 {
+            font-size: 22pt;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #4f46e5;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 14pt;
+            color: #333;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        h3 {
+            font-size: 12pt;
+            color: #444;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #1a1a1a;
+        }
+
+        ul, ol {
+            margin: 15px 0 20px 30px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* ============ SIGNATURES ============ */
+        .signatures {
+            margin-top: 60px;
+            page-break-inside: avoid;
+        }
+
+        .signatures-title {
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #4f46e5;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sig-table {
+            width: 100%;
+        }
+
+        .sig-cell {
+            width: 45%;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .sig-box {
+            border: 1px solid #ddd;
+            padding: 25px;
+            background: #fafafa;
+            height: 150px;
+        }
+
+        .sig-label {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 70px;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #333;
+            margin-bottom: 10px;
+        }
+
+        .sig-hint {
+            font-size: 8pt;
+            color: #999;
+            text-align: center;
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 9pt;
+            color: #999;
+        }
+
+        .legal-notice {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            margin-top: 40px;
+            font-size: 9pt;
+            color: #666;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    {% if document.status == 'draft' %}
+        <div class="watermark">BROUILLON</div>
+    {% elseif document.status == 'review' %}
+        <div class="watermark">EN REVUE</div>
+    {% endif %}
+
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <table>
+                <tr>
+                    <td style="vertical-align: top;">
+                        <div class="brand">LegalDocs</div>
+                        <div class="brand-tagline">Documents juridiques intelligents</div>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <div class="doc-info">
+                            <div class="doc-ref">DOC-{{ '%05d'|format(document.id) }}</div>
+                            <div>Créé le {{ document.createdAt|date('d/m/Y') }}</div>
+                            {% if document.updatedAt %}
+                                <div>Modifié le {{ document.updatedAt|date('d/m/Y') }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card">
+            <div class="info-card-title">Informations du document</div>
+            <table>
+                <tr>
+                    <td class="info-label">Type de document</td>
+                    <td class="info-value">{{ document.template.name }}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Statut</td>
+                    <td class="info-value">
+                        {% set statusLabels = {
+                            'draft': 'Brouillon',
+                            'review': 'En revue',
+                            'approved': 'Approuvé',
+                            'signed': 'Signé',
+                            'archived': 'Archivé'
+                        } %}
+                        <span class="status-pill status-{{ document.status }}">
+                            {{ statusLabels[document.status] }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="info-label">Rédigé par</td>
+                    <td class="info-value">{{ document.createdBy.name }}</td>
+                </tr>
+                {% if document.organization %}
+                <tr>
+                    <td class="info-label">Organisation</td>
+                    <td class="info-value">{{ document.organization.name }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <!-- Document Content -->
+        <div class="document-body">
+            {{ document.generatedContent|markdown_to_html|raw }}
+        </div>
+
+        <!-- Signatures -->
+        {% if document.status in ['approved', 'signed'] %}
+        <div class="signatures">
+            <div class="signatures-title">Signatures des parties</div>
+            <table class="sig-table">
+                <tr>
+                    <td class="sig-cell">
+                        <div class="sig-box">
+                            <div class="sig-label">Partie 1</div>
+                            <div class="sig-line"></div>
+                            <div class="sig-hint">Lu et approuvé, signature</div>
+                        </div>
+                    </td>
+                    <td style="width: 10%"></td>
+                    <td class="sig-cell">
+                        <div class="sig-box">
+                            <div class="sig-label">Partie 2</div>
+                            <div class="sig-line"></div>
+                            <div class="sig-hint">Lu et approuvé, signature</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Legal Notice -->
+        <div class="legal-notice">
+            Ce document a été généré via la plateforme <strong>LegalDocs</strong>.<br>
+            Il appartient aux parties de vérifier sa conformité avec la législation en vigueur.
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Document {{ document.template.name }} (v{{ document.template.version }}) — 
+            Généré le {{ 'now'|date('d/m/Y à H:i') }}
+        </div>
+    </div>
+</body>
+</html>

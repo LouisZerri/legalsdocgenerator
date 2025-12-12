@@ -1,0 +1,358 @@
+{% extends 'layout/app.html.twig' %}
+
+{% block title %}Dashboard - Legal Docs Generator{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome -->
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Bonjour {{ app.user.name }} 👋</h1>
+    <p class="text-gray-600 mt-1">Voici un aperçu de votre activité</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Documents -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Total Documents</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total }}</p>
+            </div>
+            <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm">
+            <span class="text-green-600 font-medium">{{ stats.signed }}</span>
+            <span class="text-gray-500 ml-1">signés</span>
+            <span class="mx-2 text-gray-300">•</span>
+            <span class="text-yellow-600 font-medium">{{ stats.review }}</span>
+            <span class="text-gray-500 ml-1">en revue</span>
+        </div>
+    </div>
+
+    <!-- Brouillons -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Brouillons</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.draft }}</p>
+            </div>
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+            </div>
+        </div>
+        <a href="{{ path('app_document_index') }}?status=draft" class="mt-4 inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+            Voir les brouillons
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+
+    <!-- En attente -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">En attente de validation</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.review }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        {% if stats.review > 0 %}
+            <p class="mt-4 text-sm text-yellow-600 font-medium">Action requise</p>
+        {% else %}
+            <p class="mt-4 text-sm text-gray-500">Aucun document en attente</p>
+        {% endif %}
+    </div>
+
+    <!-- Templates -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Templates</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.templates }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                </svg>
+            </div>
+        </div>
+        <a href="{{ path('app_template_index') }}" class="mt-4 inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+            Gérer les templates
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Graphique activité -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Activité des 6 derniers mois</h3>
+        <canvas id="activityChart" height="100"></canvas>
+    </div>
+
+    <!-- Répartition par statut -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Répartition par statut</h3>
+        <canvas id="statusChart" height="200"></canvas>
+    </div>
+</div>
+
+<!-- Documents récents et actions rapides -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+    <!-- Documents récents -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-gray-900">Documents récents</h3>
+            <a href="{{ path('app_document_index') }}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                Voir tout
+            </a>
+        </div>
+        
+        {% if recentDocuments|length > 0 %}
+            <div class="divide-y divide-gray-100">
+                {% for document in recentDocuments %}
+                    <a href="{{ path('app_document_show', {id: document.id}) }}" 
+                       class="block p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ document.template.name }}</p>
+                                    <p class="text-sm text-gray-500">DOC-{{ '%05d'|format(document.id) }} • {{ document.createdAt|date('d/m/Y') }}</p>
+                                </div>
+                            </div>
+                            <div>
+                                {% set statusColors = {
+                                    'draft': 'bg-gray-100 text-gray-700',
+                                    'review': 'bg-yellow-100 text-yellow-700',
+                                    'approved': 'bg-green-100 text-green-700',
+                                    'signed': 'bg-blue-100 text-blue-700',
+                                    'archived': 'bg-purple-100 text-purple-700'
+                                } %}
+                                {% set statusLabels = {
+                                    'draft': 'Brouillon',
+                                    'review': 'En revue',
+                                    'approved': 'Approuvé',
+                                    'signed': 'Signé',
+                                    'archived': 'Archivé'
+                                } %}
+                                <span class="px-2.5 py-1 text-xs font-medium rounded-full {{ statusColors[document.status] }}">
+                                    {{ statusLabels[document.status] }}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="p-8 text-center text-gray-500">
+                <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p>Aucun document créé</p>
+                <a href="{{ path('app_template_index') }}" class="mt-2 inline-block text-indigo-600 hover:text-indigo-800">
+                    Créer votre premier document
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Actions rapides</h3>
+        <div class="space-y-3">
+            <a href="{{ path('app_template_index') }}" 
+               class="flex items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition group">
+                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center mr-4">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 group-hover:text-indigo-600">Nouveau document</p>
+                    <p class="text-sm text-gray-500">Choisir un template</p>
+                </div>
+            </a>
+            
+            {% if is_granted('ROLE_EDITOR') %}
+            <a href="{{ path('app_template_new') }}" 
+               class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition group">
+                <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-4">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 group-hover:text-purple-600">Créer un template</p>
+                    <p class="text-sm text-gray-500">Nouveau modèle personnalisé</p>
+                </div>
+            </a>
+            {% endif %}
+            
+            <a href="{{ path('app_document_index') }}" 
+               class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition group">
+                <div class="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center mr-4">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 group-hover:text-gray-600">Tous les documents</p>
+                    <p class="text-sm text-gray-500">Gérer vos documents</p>
+                </div>
+            </a>
+        </div>
+        
+        {% if pendingReview|length > 0 %}
+            <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <p class="text-sm font-medium text-yellow-800">
+                        {{ pendingReview|length }} document(s) en attente de revue
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('turbo:load', function() {
+    // Graphique activité (barres)
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    new Chart(activityCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ monthlyStats|map(m => m.label)|json_encode|raw }},
+            datasets: [{
+                label: 'Documents créés',
+                data: {{ monthlyStats|map(m => m.count)|json_encode|raw }},
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 1,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return context.raw + ' document(s)';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        color: '#6b7280',
+                        font: { size: 11 }
+                    },
+                    grid: {
+                        color: 'rgba(229, 231, 235, 0.5)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#6b7280',
+                        font: { size: 11 }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Graphique répartition (donut)
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Brouillons', 'En revue', 'Approuvés', 'Signés', 'Archivés'],
+            datasets: [{
+                data: [{{ stats.draft }}, {{ stats.review }}, {{ stats.approved }}, {{ stats.signed }}, {{ stats.archived }}],
+                backgroundColor: [
+                    'rgba(107, 114, 128, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(139, 92, 246, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(107, 114, 128, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(139, 92, 246, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: { size: 11 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw + ' document(s)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'layout/app.html.twig' %}
+
+{% block title %}Gestion des organisations{% endblock %}
+{% block page_title %}Gestion des organisations{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <p class="text-gray-600">{{ organizations|length }} organisation(s)</p>
+    <a href="{{ path('app_admin_organization_new') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+        + Nouvelle organisation
+    </a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for org in organizations %}
+    <div class="bg-white rounded-lg shadow hover:shadow-lg transition">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <span class="text-purple-600 font-bold text-lg">{{ org.name|slice(0,1)|upper }}</span>
+                </div>
+                {% set plan = org.settings.plan ?? 'free' %}
+                {% set planColors = {
+                    'free': 'bg-gray-100 text-gray-800',
+                    'pro': 'bg-blue-100 text-blue-800',
+                    'enterprise': 'bg-purple-100 text-purple-800'
+                } %}
+                <span class="px-2 py-1 text-xs rounded-full {{ planColors[plan] ?? 'bg-gray-100 text-gray-800' }}">
+                    {{ plan|capitalize }}
+                </span>
+            </div>
+            
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ org.name }}</h3>
+            
+            <div class="text-sm text-gray-600 space-y-1">
+                <p>{{ org.users|length }} utilisateur(s)</p>
+                <p>{{ org.templates|length }} template(s)</p>
+                <p>Créé le {{ org.createdAt|date('d/m/Y') }}</p>
+            </div>
+            
+            <div class="mt-4 flex gap-2">
+                <a href="{{ path('app_admin_organization_show', {id: org.id}) }}" 
+                   class="flex-1 text-center bg-gray-100 text-gray-700 px-3 py-2 rounded hover:bg-gray-200 transition text-sm">
+                    Voir
+                </a>
+                <a href="{{ path('app_admin_organization_edit', {id: org.id}) }}" 
+                   class="flex-1 text-center bg-indigo-100 text-indigo-700 px-3 py-2 rounded hover:bg-indigo-200 transition text-sm">
+                    Modifier
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
