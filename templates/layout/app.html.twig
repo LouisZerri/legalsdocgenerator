@@ -129,39 +129,199 @@
 		</main>
 	</div>
 
-    <!-- Chatbot Widget -->
-    <div id="chatbot-widget" class="fixed bottom-6 right-6 z-50">
-        <!-- Chat Window -->
-        <div id="chat-window" class="hidden mb-4 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" style="height: 500px;">
-            <!-- Header -->
-            <div class="bg-indigo-600 px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	<!-- Chatbot Widget -->
+	<div
+		id="chatbot-widget" class="fixed bottom-6 right-6 z-50">
+		<!-- Chat Window -->
+		<div
+			id="chat-window" class="hidden mb-4 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" style="height: 500px;">
+			<!-- Header -->
+			<div class="bg-indigo-600 px-4 py-3 flex items-center justify-between">
+				<div class="flex items-center">
+					<div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+						<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+						</svg>
+					</div>
+					<div>
+						<h3 class="font-semibold text-white text-sm">Assistant Juridique</h3>
+						<p class="text-xs text-indigo-200" id="widget-status">En ligne</p>
+					</div>
+				</div>
+				<div class="flex items-center space-x-2">
+					<button onclick="clearWidgetChat()" class="text-white/70 hover:text-white transition cursor-pointer" title="Effacer">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+						</svg>
+					</button>
+					<button onclick="toggleChat()" class="text-white/70 hover:text-white transition cursor-pointer" title="Fermer">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<!-- Messages -->
+			<div id="widget-messages" class="p-4 space-y-3 overflow-y-auto" style="height: 350px;">
+				<div class="flex items-start">
+					<div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+						<svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+						</svg>
+					</div>
+					<div class="bg-gray-100 rounded-xl rounded-tl-none px-3 py-2 max-w-[85%]">
+						<p class="text-sm text-gray-800">Bonjour ! Je suis votre assistant juridique. Comment puis-je vous aider ?</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Input -->
+			<div class="px-4 py-3 border-t border-gray-100">
+				<form id="widget-form" class="flex items-center space-x-2">
+					<input type="text" id="widget-input" placeholder="Votre question..." class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" autocomplete="off">
+					<button type="submit" id="widget-send-btn" class="p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+						</svg>
+					</button>
+				</form>
+			</div>
+		</div>
+
+		<!-- Toggle Button -->
+		<button onclick="toggleChat()" id="chat-toggle" class="w-14 h-14 bg-indigo-600 rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition transform hover:scale-105 cursor-pointer">
+			<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+			</svg>
+		</button>
+	</div>
+
+    <script>
+    (function() {
+        // Éviter la double initialisation
+        if (window.chatbotInitialized) return;
+        window.chatbotInitialized = true;
+
+        let widgetHistory = [];
+        let chatOpen = false;
+        const widgetMessages = document.getElementById('widget-messages');
+        const widgetForm = document.getElementById('widget-form');
+        const widgetInput = document.getElementById('widget-input');
+        const chatWindow = document.getElementById('chat-window');
+        const chatToggle = document.getElementById('chat-toggle');
+
+        if (!widgetForm) return;
+
+        window.toggleChat = function() {
+            chatOpen = !chatOpen;
+            if (chatOpen) {
+                chatWindow.classList.remove('hidden');
+                chatToggle.classList.add('hidden');
+                widgetInput.focus();
+            } else {
+                chatWindow.classList.add('hidden');
+                chatToggle.classList.remove('hidden');
+            }
+        };
+
+        function addWidgetMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start' + (isUser ? ' justify-end' : '');
+            
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="bg-indigo-600 text-white rounded-xl rounded-tr-none px-3 py-2 max-w-[85%]">
+                        <p class="text-sm">${escapeWidgetHtml(content)}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                        <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <div>
-                        <h3 class="font-semibold text-white text-sm">Assistant Juridique</h3>
-                        <p class="text-xs text-indigo-200" id="widget-status">En ligne</p>
+                    <div class="bg-gray-100 rounded-xl rounded-tl-none px-3 py-2 max-w-[85%]">
+                        <p class="text-sm text-gray-800 whitespace-pre-wrap">${escapeWidgetHtml(content)}</p>
+                    </div>
+                `;
+            }
+            
+            widgetMessages.appendChild(messageDiv);
+            widgetMessages.scrollTop = widgetMessages.scrollHeight;
+        }
+
+        function addWidgetLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'widget-loading';
+            loadingDiv.className = 'flex items-start';
+            loadingDiv.innerHTML = `
+                <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                    <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="bg-gray-100 rounded-xl rounded-tl-none px-3 py-2">
+                    <div class="flex items-center space-x-1">
+                        <span class="block w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0s; animation-duration: 0.6s;"></span>
+                        <span class="block w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s; animation-duration: 0.6s;"></span>
+                        <span class="block w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.4s; animation-duration: 0.6s;"></span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <button onclick="clearWidgetChat()" class="text-white/70 hover:text-white transition cursor-pointer" title="Effacer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                    </button>
-                    <button onclick="toggleChat()" class="text-white/70 hover:text-white transition cursor-pointer" title="Fermer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
+            `;
+            widgetMessages.appendChild(loadingDiv);
+            widgetMessages.scrollTop = widgetMessages.scrollHeight;
+        }
 
-            <!-- Messages -->
-            <div id="widget-messages" class="p-4 space-y-3 overflow-y-auto" style="height: 350px;">
+        function removeWidgetLoading() {
+            const loading = document.getElementById('widget-loading');
+            if (loading) loading.remove();
+        }
+
+        async function sendWidgetMessage(message) {
+            if (!message.trim()) return;
+            
+            addWidgetMessage(message, true);
+            widgetHistory.push({ role: 'user', content: message });
+            
+            widgetInput.value = '';
+            widgetInput.disabled = true;
+            document.getElementById('widget-send-btn').disabled = true;
+            addWidgetLoading();
+            
+            try {
+                const response = await fetch('/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message,
+                        history: widgetHistory.slice(-10)
+                    })
+                });
+                
+                const data = await response.json();
+                removeWidgetLoading();
+                
+                if (data.success && data.response) {
+                    addWidgetMessage(data.response, false);
+                    widgetHistory.push({ role: 'assistant', content: data.response });
+                } else {
+                    addWidgetMessage('Désolé, une erreur est survenue.', false);
+                }
+            } catch (e) {
+                removeWidgetLoading();
+                addWidgetMessage('Erreur de connexion.', false);
+            }
+            
+            widgetInput.disabled = false;
+            document.getElementById('widget-send-btn').disabled = false;
+            widgetInput.focus();
+        }
+
+        window.clearWidgetChat = function() {
+            widgetHistory = [];
+            widgetMessages.innerHTML = `
                 <div class="flex items-start">
                     <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                         <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,177 +329,22 @@
                         </svg>
                     </div>
                     <div class="bg-gray-100 rounded-xl rounded-tl-none px-3 py-2 max-w-[85%]">
-                        <p class="text-sm text-gray-800">Bonjour ! Je suis votre assistant juridique. Comment puis-je vous aider ?</p>
+                        <p class="text-sm text-gray-800">Conversation effacée. Comment puis-je vous aider ?</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Input -->
-            <div class="px-4 py-3 border-t border-gray-100">
-                <form id="widget-form" class="flex items-center space-x-2">
-                    <input type="text" id="widget-input" 
-                        placeholder="Votre question..." 
-                        class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        autocomplete="off">
-                    <button type="submit" id="widget-send-btn" 
-                        class="p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                        </svg>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Toggle Button -->
-        <button onclick="toggleChat()" id="chat-toggle" 
-            class="w-14 h-14 bg-indigo-600 rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition transform hover:scale-105 cursor-pointer">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-            </svg>
-        </button>
-    </div>
-
-    <script>
-    let widgetHistory = [];
-    let chatOpen = false;
-    const widgetMessages = document.getElementById('widget-messages');
-    const widgetForm = document.getElementById('widget-form');
-    const widgetInput = document.getElementById('widget-input');
-    const chatWindow = document.getElementById('chat-window');
-    const chatToggle = document.getElementById('chat-toggle');
-
-    function toggleChat() {
-        chatOpen = !chatOpen;
-        if (chatOpen) {
-            chatWindow.classList.remove('hidden');
-            chatToggle.classList.add('hidden');
-            widgetInput.focus();
-        } else {
-            chatWindow.classList.add('hidden');
-            chatToggle.classList.remove('hidden');
-        }
-    }
-
-    function addWidgetMessage(content, isUser = false) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'flex items-start' + (isUser ? ' justify-end' : '');
-        
-        if (isUser) {
-            messageDiv.innerHTML = `
-                <div class="bg-indigo-600 text-white rounded-xl rounded-tr-none px-3 py-2 max-w-[85%]">
-                    <p class="text-sm">${escapeWidgetHtml(content)}</p>
-                </div>
             `;
-        } else {
-            messageDiv.innerHTML = `
-                <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                    <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <div class="bg-gray-100 rounded-xl rounded-tl-none px-3 py-2 max-w-[85%]">
-                    <p class="text-sm text-gray-800 whitespace-pre-wrap">${escapeWidgetHtml(content)}</p>
-                </div>
-            `;
+        };
+
+        function escapeWidgetHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-        
-        widgetMessages.appendChild(messageDiv);
-        widgetMessages.scrollTop = widgetMessages.scrollHeight;
-    }
 
-    function addWidgetLoading() {
-        const loadingDiv = document.createElement('div');
-        loadingDiv.id = 'widget-loading';
-        loadingDiv.className = 'flex items-start';
-        loadingDiv.innerHTML = `
-            <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                </svg>
-            </div>
-            <div class="bg-gray-100 rounded-xl rounded-tl-none px-3 py-2">
-                <div class="flex items-center space-x-1">
-                    <span class="block w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0s; animation-duration: 0.6s;"></span>
-                    <span class="block w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s; animation-duration: 0.6s;"></span>
-                    <span class="block w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.4s; animation-duration: 0.6s;"></span>
-                </div>
-            </div>
-        `;
-        widgetMessages.appendChild(loadingDiv);
-        widgetMessages.scrollTop = widgetMessages.scrollHeight;
-    }
-
-    function removeWidgetLoading() {
-        const loading = document.getElementById('widget-loading');
-        if (loading) loading.remove();
-    }
-
-    async function sendWidgetMessage(message) {
-        if (!message.trim()) return;
-        
-        addWidgetMessage(message, true);
-        widgetHistory.push({ role: 'user', content: message });
-        
-        widgetInput.value = '';
-        widgetInput.disabled = true;
-        document.getElementById('widget-send-btn').disabled = true;
-        addWidgetLoading();
-        
-        try {
-            const response = await fetch('{{ path('app_chat_send') }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    message: message,
-                    history: widgetHistory.slice(-10)
-                })
-            });
-            
-            const data = await response.json();
-            removeWidgetLoading();
-            
-            if (data.success && data.response) {
-                addWidgetMessage(data.response, false);
-                widgetHistory.push({ role: 'assistant', content: data.response });
-            } else {
-                addWidgetMessage('Désolé, une erreur est survenue.', false);
-            }
-        } catch (e) {
-            removeWidgetLoading();
-            addWidgetMessage('Erreur de connexion.', false);
-        }
-        
-        widgetInput.disabled = false;
-        document.getElementById('widget-send-btn').disabled = false;
-        widgetInput.focus();
-    }
-
-    function clearWidgetChat() {
-        widgetHistory = [];
-        widgetMessages.innerHTML = `
-            <div class="flex items-start">
-                <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                    <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <div class="bg-gray-100 rounded-xl rounded-tl-none px-3 py-2 max-w-[85%]">
-                    <p class="text-sm text-gray-800">Conversation effacée. Comment puis-je vous aider ?</p>
-                </div>
-            </div>
-        `;
-    }
-
-    function escapeWidgetHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    widgetForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        sendWidgetMessage(widgetInput.value);
-    });
+        widgetForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendWidgetMessage(widgetInput.value);
+        });
+    })();
 </script>
 {% endblock %}

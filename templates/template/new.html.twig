@@ -4,52 +4,276 @@
 {% block page_title %}Nouveau template{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl">
-    <form method="post" class="space-y-6">
-        <div class="bg-white rounded-lg shadow p-6 space-y-4">
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom du template *</label>
-                <input type="text" name="name" id="name" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Ex: Accord de confidentialité">
+<div class="flex gap-6">
+    <!-- Formulaire principal -->
+    <div class="flex-1">
+        <form method="post" class="space-y-6" data-turbo="false">
+            <div class="bg-white rounded-lg shadow p-6 space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom du template *</label>
+                    <input type="text" name="name" id="name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Ex: Accord de confidentialité">
+                </div>
+                
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="description" id="description" rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Description du template..."></textarea>
+                </div>
+                
+                <div>
+                    <label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">Visibilité</label>
+                    <select name="visibility" id="visibility"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="private">Privé (mon organisation)</option>
+                        {% if is_granted('ROLE_SUPER_ADMIN') %}
+                            <option value="global">Global (tous les utilisateurs)</option>
+                        {% endif %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="bodyMarkdown" class="block text-sm font-medium text-gray-700 mb-1">Contenu du template *</label>
+                    <p class="text-xs text-gray-500 mb-2">Utilisez la syntaxe Markdown. Cliquez sur une variable à droite pour l'insérer.</p>
+                    <textarea name="bodyMarkdown" id="bodyMarkdown" rows="20" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm"
+                        placeholder="# Titre du document
+
+Rédigez votre template ici..."></textarea>
+                </div>
             </div>
             
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea name="description" id="description" rows="2"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Description du template..."></textarea>
+            <div class="flex gap-4">
+                <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition cursor-pointer">
+                    Créer le template
+                </button>
+                <a href="{{ path('app_template_index') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition">
+                    Annuler
+                </a>
             </div>
-            
-            <div>
-                <label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">Visibilité</label>
-                <select name="visibility" id="visibility"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="private">Privé (mon organisation)</option>
-                    {% if is_granted('ROLE_SUPER_ADMIN') %}
-                        <option value="global">Global (tous les utilisateurs)</option>
-                    {% endif %}
-                </select>
+        </form>
+    </div>
+
+    <!-- Panneau des variables -->
+    <div class="w-80 flex-shrink-0">
+        <div class="bg-white rounded-lg shadow p-4 sticky top-24">
+            <h3 class="font-semibold text-gray-900 mb-3 flex items-center">
+                <svg class="w-5 h-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Variables disponibles
+            </h3>
+            <p class="text-xs text-gray-500 mb-4">Cliquez pour insérer dans le template</p>
+
+            <!-- Variables courantes -->
+            <div class="mb-4">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Parties</h4>
+                <div class="space-y-1">
+                    <button type="button" onclick="insertVariable('partie_1_nom')" class="variable-btn"><span class="var-name">partie_1_nom</span><span class="var-type type-text">text</span></button>
+                    <button type="button" onclick="insertVariable('partie_1_adresse')" class="variable-btn"><span class="var-name">partie_1_adresse</span><span class="var-type type-textarea">textarea</span></button>
+                    <button type="button" onclick="insertVariable('partie_1_email')" class="variable-btn"><span class="var-name">partie_1_email</span><span class="var-type type-email">email</span></button>
+                    <button type="button" onclick="insertVariable('partie_2_nom')" class="variable-btn"><span class="var-name">partie_2_nom</span><span class="var-type type-text">text</span></button>
+                    <button type="button" onclick="insertVariable('partie_2_adresse')" class="variable-btn"><span class="var-name">partie_2_adresse</span><span class="var-type type-textarea">textarea</span></button>
+                    <button type="button" onclick="insertVariable('partie_2_email')" class="variable-btn"><span class="var-name">partie_2_email</span><span class="var-type type-email">email</span></button>
+                </div>
             </div>
-            
-            <div>
-                <label for="bodyMarkdown" class="block text-sm font-medium text-gray-700 mb-1">Contenu du template *</label>
-                <p class="text-xs text-gray-500 mb-2">Utilisez la syntaxe Markdown. Variables : <code class="bg-gray-100 px-1 rounded">{{ '{{nom_variable}}' }}</code></p>
-                <textarea name="bodyMarkdown" id="bodyMarkdown" rows="20" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm"
-                    placeholder="# Titre du document
-                    Entre **{{ '{{' }}partie_1{{ '}}' }}** et **{{ '{{' }}partie_2{{ '}}' }}**..."></textarea>
+
+            <div class="mb-4">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Entreprise</h4>
+                <div class="space-y-1">
+                    <button type="button" onclick="insertVariable('entreprise_nom')" class="variable-btn"><span class="var-name">entreprise_nom</span><span class="var-type type-text">text</span></button>
+                    <button type="button" onclick="insertVariable('entreprise_adresse')" class="variable-btn"><span class="var-name">entreprise_adresse</span><span class="var-type type-textarea">textarea</span></button>
+                    <button type="button" onclick="insertVariable('entreprise_siret')" class="variable-btn"><span class="var-name">entreprise_siret</span><span class="var-type type-text">text</span></button>
+                    <button type="button" onclick="insertVariable('entreprise_capital')" class="variable-btn"><span class="var-name">entreprise_capital</span><span class="var-type type-number">number</span></button>
+                    <button type="button" onclick="insertVariable('entreprise_email')" class="variable-btn"><span class="var-name">entreprise_email</span><span class="var-type type-email">email</span></button>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Contrat</h4>
+                <div class="space-y-1">
+                    <button type="button" onclick="insertVariable('objet_contrat')" class="variable-btn"><span class="var-name">objet_contrat</span><span class="var-type type-textarea">textarea</span></button>
+                    <button type="button" onclick="insertVariable('duree_contrat')" class="variable-btn"><span class="var-name">duree_contrat</span><span class="var-type type-number">number</span></button>
+                    <button type="button" onclick="insertVariable('montant')" class="variable-btn"><span class="var-name">montant</span><span class="var-type type-number">number</span></button>
+                    <button type="button" onclick="insertVariable('date_debut')" class="variable-btn"><span class="var-name">date_debut</span><span class="var-type type-date">date</span></button>
+                    <button type="button" onclick="insertVariable('date_fin')" class="variable-btn"><span class="var-name">date_fin</span><span class="var-type type-date">date</span></button>
+                    <button type="button" onclick="insertSelectVariable('type_paiement', ['Virement', 'Chèque', 'Espèces', 'Carte bancaire'])" class="variable-btn"><span class="var-name">type_paiement</span><span class="var-type type-select">select</span></button>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Signature</h4>
+                <div class="space-y-1">
+                    <button type="button" onclick="insertVariable('lieu_signature')" class="variable-btn"><span class="var-name">lieu_signature</span><span class="var-type type-text">text</span></button>
+                    <button type="button" onclick="insertVariable('date_signature')" class="variable-btn"><span class="var-name">date_signature</span><span class="var-type type-date">date</span></button>
+                </div>
+            </div>
+
+            <!-- Variable personnalisée -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Variable personnalisée</h4>
+                <div class="space-y-2">
+                    <input type="text" id="customVariable" placeholder="nom_variable" 
+                        class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <select id="customType" class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        <option value="text">text - Texte simple</option>
+                        <option value="textarea">textarea - Texte multiligne</option>
+                        <option value="number">number - Nombre</option>
+                        <option value="date">date - Date</option>
+                        <option value="email">email - Email</option>
+                        <option value="select">select - Liste déroulante</option>
+                    </select>
+                    <div id="selectOptionsWrapper" class="hidden">
+                        <input type="text" id="selectOptions" placeholder="Option1, Option2, Option3" 
+                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        <p class="text-xs text-gray-400 mt-1">Séparez les options par des virgules</p>
+                    </div>
+                    <button type="button" onclick="insertCustomVariable()" 
+                        class="w-full px-3 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition">
+                        + Insérer la variable
+                    </button>
+                </div>
+            </div>
+
+            <!-- Types disponibles -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Types disponibles</h4>
+                <div class="space-y-1 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="type-badge type-text">text</span>
+                        <span class="text-gray-600">Texte simple</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="type-badge type-textarea">textarea</span>
+                        <span class="text-gray-600">Texte multiligne</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="type-badge type-number">number</span>
+                        <span class="text-gray-600">Nombre</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="type-badge type-date">date</span>
+                        <span class="text-gray-600">Sélecteur de date</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="type-badge type-email">email</span>
+                        <span class="text-gray-600">Adresse email</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="type-badge type-select">select</span>
+                        <span class="text-gray-600">Liste déroulante</span>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="flex gap-4">
-            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition cursor-pointer">
-                Créer le template
-            </button>
-            <a href="{{ path('app_template_index') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition">
-                Annuler
-            </a>
-        </div>
-    </form>
+    </div>
 </div>
+
+{% verbatim %}
+<script>
+(function() {
+    const textarea = document.getElementById('bodyMarkdown');
+    if (!textarea) return;
+
+    const variableTypes = {
+        'partie_1_nom': 'text',
+        'partie_1_adresse': 'textarea',
+        'partie_1_email': 'email',
+        'partie_2_nom': 'text',
+        'partie_2_adresse': 'textarea',
+        'partie_2_email': 'email',
+        'entreprise_nom': 'text',
+        'entreprise_adresse': 'textarea',
+        'entreprise_siret': 'text',
+        'entreprise_capital': 'number',
+        'entreprise_email': 'email',
+        'objet_contrat': 'textarea',
+        'duree_contrat': 'number',
+        'montant': 'number',
+        'date_debut': 'date',
+        'date_fin': 'date',
+        'lieu_signature': 'text',
+        'date_signature': 'date'
+    };
+
+    window.insertVariable = function(name) {
+        const type = variableTypes[name] || 'text';
+        const variable = type !== 'text' ? '{{' + name + ':' + type + '}}' : '{{' + name + '}}';
+        insertAtCursor(variable);
+    };
+
+    window.insertSelectVariable = function(name, options) {
+        const variable = '{{' + name + ':select:' + options.join(',') + '}}';
+        insertAtCursor(variable);
+    };
+
+    window.insertCustomVariable = function() {
+        const input = document.getElementById('customVariable');
+        const typeSelect = document.getElementById('customType');
+        const optionsInput = document.getElementById('selectOptions');
+        let name = input.value.trim();
+        const type = typeSelect.value;
+        
+        name = name.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+        
+        if (name) {
+            let variable;
+            if (type === 'select' && optionsInput && optionsInput.value.trim()) {
+                variable = '{{' + name + ':select:' + optionsInput.value.trim() + '}}';
+            } else if (type !== 'text') {
+                variable = '{{' + name + ':' + type + '}}';
+            } else {
+                variable = '{{' + name + '}}';
+            }
+            insertAtCursor(variable);
+            input.value = '';
+            typeSelect.value = 'text';
+            if (optionsInput) optionsInput.value = '';
+            document.getElementById('selectOptionsWrapper').classList.add('hidden');
+        }
+    };
+
+    function insertAtCursor(text) {
+        textarea.focus();
+        
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const before = textarea.value.substring(0, start);
+        const after = textarea.value.substring(end);
+        
+        textarea.value = before + text + after;
+        
+        const newPos = start + text.length;
+        textarea.setSelectionRange(newPos, newPos);
+        textarea.focus();
+    }
+
+    // Afficher/masquer le champ options selon le type
+    const customTypeSelect = document.getElementById('customType');
+    const selectOptionsWrapper = document.getElementById('selectOptionsWrapper');
+
+    if (customTypeSelect) {
+        customTypeSelect.addEventListener('change', function() {
+            if (this.value === 'select') {
+                selectOptionsWrapper.classList.remove('hidden');
+            } else {
+                selectOptionsWrapper.classList.add('hidden');
+            }
+        });
+    }
+
+    const customInput = document.getElementById('customVariable');
+    if (customInput) {
+        customInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                window.insertCustomVariable();
+            }
+        });
+    }
+})();
+</script>
+{% endverbatim %}
 {% endblock %}

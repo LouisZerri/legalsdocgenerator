@@ -38,7 +38,7 @@ class AppFixtures extends Fixture
         $manager->persist($org3);
 
         // ========== UTILISATEURS ==========
-        
+
         // Super Admin (sans organisation)
         $superAdmin = new User();
         $superAdmin->setEmail('superadmin@legaldocs.fr');
@@ -99,7 +99,7 @@ class AppFixtures extends Fixture
         $manager->persist($userStartup);
 
         // ========== TEMPLATES ==========
-        
+
         // Template NDA (global)
         $templateNda = new Template();
         $templateNda->setName('Accord de Confidentialité (NDA)');
@@ -477,9 +477,24 @@ MARKDOWN);
     private function generateContent(Template $template, array $data): string
     {
         $content = $template->getBodyMarkdown();
+
+        // Formatter les dates en français
+        $formatter = new \IntlDateFormatter(
+            'fr_FR',
+            \IntlDateFormatter::LONG,
+            \IntlDateFormatter::NONE
+        );
+
         foreach ($data as $key => $value) {
+            // Détecter si c'est une date (format YYYY-MM-DD)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+                $date = new \DateTime($value);
+                $value = $formatter->format($date);
+            }
+
             $content = str_replace('{{' . $key . '}}', $value, $content);
         }
+
         return $content;
     }
 }

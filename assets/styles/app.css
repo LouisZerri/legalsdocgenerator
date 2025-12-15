@@ -1,2 +1,87 @@
 @import "tailwindcss";
 @source not "../../public";
+
+.variable-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 12px;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.variable-btn:hover {
+    background-color: #e0e7ff;
+    border-color: #a5b4fc;
+}
+
+.var-name {
+    font-family: monospace;
+    color: #4f46e5;
+}
+
+.var-name::before {
+    content: '{{ ';
+    color: #9ca3af;
+}
+
+.var-name::after {
+    content: ' }}';
+    color: #9ca3af;
+}
+
+.var-type {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.type-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-family: monospace;
+}
+
+.var-type,
+.type-badge {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.type-text {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.type-textarea {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.type-number {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.type-date {
+    background-color: #fce7f3;
+    color: #9d174d;
+}
+
+.type-email {
+    background-color: #e0e7ff;
+    color: #3730a3;
+}
+
+.type-select {
+    background-color: #f3e8ff;
+    color: #6b21a8;
+}

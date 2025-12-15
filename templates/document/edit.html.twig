@@ -15,29 +15,42 @@
     <div>
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ document.template.name }}</h3>
-            
-            <form method="post" class="space-y-4">
+
+            <form method="post" class="space-y-4" data-turbo="false">
                 {% for variable in document.template.variablesJson %}
                     <div>
                         <label for="{{ variable.name }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ variable.name|replace({'_': ' '})|title }}
+                            {{ variable.label ?? variable.name|replace({'_': ' '})|title }}
                             {% if variable.required %}<span class="text-red-500">*</span>{% endif %}
                         </label>
-                        
-                        {% set currentValue = document.dataJson[variable.name] ?? '' %}
-                        
+
+                        {% set currentValue = oldData[variable.name] ?? document.dataJson[variable.name] ?? '' %}
+
                         {% if variable.type == 'textarea' %}
                             <textarea name="{{ variable.name }}" id="{{ variable.name }}" rows="3"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>{{ currentValue }}</textarea>
+
                         {% elseif variable.type == 'date' %}
-                            <input type="date" name="{{ variable.name }}" id="{{ variable.name }}" value="{{ currentValue }}"
+                            <input type="date" name="{{ variable.name }}" id="{{ variable.name }}" 
+                                value="{{ currentValue }}"
+                                min="1900-01-01" max="2100-12-31"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>
+
                         {% elseif variable.type == 'number' %}
-                            <input type="number" name="{{ variable.name }}" id="{{ variable.name }}" value="{{ currentValue }}"
+                            <input type="number" name="{{ variable.name }}" id="{{ variable.name }}" step="any"
+                                value="{{ currentValue }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>
+
+                        {% elseif variable.type == 'email' %}
+                            <input type="email" name="{{ variable.name }}" id="{{ variable.name }}"
+                                value="{{ currentValue }}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="exemple@email.com"
+                                {% if variable.required %}required{% endif %}>
+
                         {% elseif variable.type == 'select' and variable.options is defined %}
                             <select name="{{ variable.name }}" id="{{ variable.name }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -47,14 +60,16 @@
                                     <option value="{{ option }}" {{ currentValue == option ? 'selected' : '' }}>{{ option }}</option>
                                 {% endfor %}
                             </select>
+
                         {% else %}
-                            <input type="text" name="{{ variable.name }}" id="{{ variable.name }}" value="{{ currentValue }}"
+                            <input type="text" name="{{ variable.name }}" id="{{ variable.name }}"
+                                value="{{ currentValue }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>
                         {% endif %}
                     </div>
                 {% endfor %}
-                
+
                 <div class="pt-4 flex gap-4">
                     <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition cursor-pointer">
                         Mettre à jour
@@ -66,7 +81,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Aperçu actuel -->
     <div>
         <div class="bg-white rounded-lg shadow p-6">

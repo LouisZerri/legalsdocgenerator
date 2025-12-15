@@ -46,21 +46,34 @@ class DocumentController extends AbstractController
         $this->denyAccessUnlessGranted('view', $template);
 
         if ($request->isMethod('POST')) {
+            // Récupérer les données du formulaire
+            $rawData = [];
+            foreach ($template->getVariablesJson() ?? [] as $variable) {
+                $rawData[$variable['name']] = $request->request->get($variable['name'], '');
+            }
+
+            // Valider les données
+            $result = $this->validateAndFormatData($template->getVariablesJson() ?? [], $rawData);
+
+            if (!empty($result['errors'])) {
+                foreach ($result['errors'] as $error) {
+                    $this->addFlash('error', $error);
+                }
+                return $this->render('document/new.html.twig', [
+                    'template' => $template,
+                    'oldData' => $rawData,
+                ]);
+            }
+
             $document = new Document();
             $document->setTemplate($template);
             $document->setCreatedBy($user);
             $document->setOrganization($user->getOrganization());
             $document->setCreatedAt(new \DateTimeImmutable());
-
-            // Récupérer les données du formulaire
-            $data = [];
-            foreach ($template->getVariablesJson() ?? [] as $variable) {
-                $data[$variable['name']] = $request->request->get($variable['name'], '');
-            }
-            $document->setDataJson($data);
+            $document->setDataJson($result['data']);
 
             // Générer le contenu
-            $generatedContent = $this->generateContent($template, $data);
+            $generatedContent = $this->generateContent($template, $result['data']);
             $document->setGeneratedContent($generatedContent);
 
             $em->persist($document);
@@ -75,6 +88,7 @@ class DocumentController extends AbstractController
 
         return $this->render('document/new.html.twig', [
             'template' => $template,
+            'oldData' => [],
         ]);
     }
 
@@ -101,13 +115,28 @@ class DocumentController extends AbstractController
         if ($request->isMethod('POST')) {
             $template = $document->getTemplate();
 
-            $data = [];
+            // Récupérer les données du formulaire
+            $rawData = [];
             foreach ($template->getVariablesJson() ?? [] as $variable) {
-                $data[$variable['name']] = $request->request->get($variable['name'], '');
+                $rawData[$variable['name']] = $request->request->get($variable['name'], '');
             }
-            $document->setDataJson($data);
 
-            $generatedContent = $this->generateContent($template, $data);
+            // Valider les données
+            $result = $this->validateAndFormatData($template->getVariablesJson() ?? [], $rawData);
+
+            if (!empty($result['errors'])) {
+                foreach ($result['errors'] as $error) {
+                    $this->addFlash('error', $error);
+                }
+                return $this->render('document/edit.html.twig', [
+                    'document' => $document,
+                    'oldData' => $rawData,
+                ]);
+            }
+
+            $document->setDataJson($result['data']);
+
+            $generatedContent = $this->generateContent($template, $result['data']);
             $document->setGeneratedContent($generatedContent);
             $document->setUpdatedAt(new \DateTimeImmutable());
 
@@ -119,6 +148,7 @@ class DocumentController extends AbstractController
 
         return $this->render('document/edit.html.twig', [
             'document' => $document,
+            'oldData' => $document->getDataJson() ?? [],
         ]);
     }
 
@@ -208,12 +238,106 @@ class DocumentController extends AbstractController
         return $response;
     }
 
+    private function validateAndFormatData(array $variables, array $data): array
+    {
+        $errors = [];
+        $formattedData = [];
+
+        foreach ($variables as $variable) {
+            $name = $variable['name'];
+            $type = $variable['type'];
+            $required = $variable['required'] ?? false;
+            $value = trim($data[$name] ?? '');
+
+            // Champ requis
+            if ($required && empty($value)) {
+                $errors[] = sprintf('Le champ "%s" est obligatoire.', $variable['label'] ?? $name);
+                continue;
+            }
+
+            if (empty($value)) {
+                $formattedData[$name] = '';
+                continue;
+            }
+
+            // Validation selon le type
+            switch ($type) {
+                case 'date':
+                    // Vérifier le format YYYY-MM-DD
+                    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+                        $errors[] = sprintf('Le champ "%s" doit être une date valide.', $variable['label'] ?? $name);
+                        break;
+                    }
+                    // Vérifier que la date est valide
+                    $parts = explode('-', $value);
+                    if (!checkdate((int)$parts[1], (int)$parts[2], (int)$parts[0])) {
+                        $errors[] = sprintf('Le champ "%s" contient une date invalide.', $variable['label'] ?? $name);
+                        break;
+                    }
+                    // Vérifier l'année raisonnable (1900-2100)
+                    $year = (int)$parts[0];
+                    if ($year < 1900 || $year > 2100) {
+                        $errors[] = sprintf('Le champ "%s" doit avoir une année entre 1900 et 2100.', $variable['label'] ?? $name);
+                        break;
+                    }
+                    $formattedData[$name] = $value;
+                    break;
+
+                case 'email':
+                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $errors[] = sprintf('Le champ "%s" doit être un email valide.', $variable['label'] ?? $name);
+                        break;
+                    }
+                    $formattedData[$name] = $value;
+                    break;
+
+                case 'number':
+                    if (!is_numeric($value)) {
+                        $errors[] = sprintf('Le champ "%s" doit être un nombre.', $variable['label'] ?? $name);
+                        break;
+                    }
+                    $formattedData[$name] = $value;
+                    break;
+
+                case 'select':
+                    $options = $variable['options'] ?? [];
+                    if (!empty($options) && !in_array($value, $options)) {
+                        $errors[] = sprintf('Le champ "%s" contient une valeur non autorisée.', $variable['label'] ?? $name);
+                        break;
+                    }
+                    $formattedData[$name] = $value;
+                    break;
+
+                default:
+                    // text, textarea - pas de validation spécifique
+                    $formattedData[$name] = $value;
+                    break;
+            }
+        }
+
+        return ['data' => $formattedData, 'errors' => $errors];
+    }
+
     private function generateContent(Template $template, array $data): string
     {
         $content = $template->getBodyMarkdown();
 
+        // Formatter les dates en français
+        $formatter = new \IntlDateFormatter(
+            'fr_FR',
+            \IntlDateFormatter::LONG,
+            \IntlDateFormatter::NONE
+        );
+
         foreach ($data as $key => $value) {
-            $content = str_replace('{{' . $key . '}}', $value, $content);
+            // Détecter si c'est une date (format YYYY-MM-DD)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+                $date = new \DateTime($value);
+                $value = $formatter->format($date);
+            }
+
+            // Remplacer {{key}}, {{key:type}} et {{key:select:options}}
+            $content = preg_replace('/\{\{' . preg_quote($key, '/') . '(:[^}]+)?\}\}/', $value, $content);
         }
 
         return $content;

@@ -19,6 +19,14 @@ class TemplateRepository extends ServiceEntityRepository
 
     public function findAccessibleByUser(User $user): array
     {
+        // Super Admin voit tout
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+            return $this->createQueryBuilder('t')
+                ->orderBy('t.name', 'ASC')
+                ->getQuery()
+                ->getResult();
+        }
+
         $qb = $this->createQueryBuilder('t')
             ->where('t.visibility = :global')
             ->setParameter('global', 'global');

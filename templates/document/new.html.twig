@@ -4,80 +4,84 @@
 {% block page_title %}Nouveau document{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <a href="{{ path('app_template_show', {id: template.id}) }}" class="text-gray-600 hover:text-gray-900">
-        ← Retour au template
-    </a>
-</div>
+<div class="max-w-4xl">
+    <div class="mb-6">
+        <a href="{{ path('app_template_index') }}" class="text-gray-600 hover:text-gray-900">
+            ← Retour aux templates
+        </a>
+    </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Formulaire -->
-    <div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ template.name }}</h3>
-            {% if template.description %}
-                <p class="text-gray-600 text-sm mb-6">{{ template.description }}</p>
-            {% endif %}
-            
-            <form method="post" class="space-y-4">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ template.name }}</h2>
+        {% if template.description %}
+            <p class="text-gray-600 mb-6">{{ template.description }}</p>
+        {% endif %}
+
+        {% if template.variablesJson is empty %}
+            <p class="text-gray-500">Ce template n'a pas de variables à remplir.</p>
+        {% else %}
+            <form method="post" class="space-y-4" data-turbo="false">
                 {% for variable in template.variablesJson %}
                     <div>
                         <label for="{{ variable.name }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ variable.label }}
+                            {{ variable.label ?? variable.name|replace({'_': ' '})|title }}
                             {% if variable.required %}<span class="text-red-500">*</span>{% endif %}
                         </label>
-                        
+
                         {% if variable.type == 'textarea' %}
                             <textarea name="{{ variable.name }}" id="{{ variable.name }}" rows="3"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                {% if variable.required %}required{% endif %}></textarea>
+                                {% if variable.required %}required{% endif %}>{{ oldData[variable.name] ?? '' }}</textarea>
+
                         {% elseif variable.type == 'date' %}
                             <input type="date" name="{{ variable.name }}" id="{{ variable.name }}"
+                                value="{{ oldData[variable.name] ?? '' }}"
+                                min="1900-01-01" max="2100-12-31"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>
+
                         {% elseif variable.type == 'number' %}
-                            <input type="number" name="{{ variable.name }}" id="{{ variable.name }}"
+                            <input type="number" name="{{ variable.name }}" id="{{ variable.name }}" step="any"
+                                value="{{ oldData[variable.name] ?? '' }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>
+
+                        {% elseif variable.type == 'email' %}
+                            <input type="email" name="{{ variable.name }}" id="{{ variable.name }}"
+                                value="{{ oldData[variable.name] ?? '' }}"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="exemple@email.com"
+                                {% if variable.required %}required{% endif %}>
+
                         {% elseif variable.type == 'select' and variable.options is defined %}
                             <select name="{{ variable.name }}" id="{{ variable.name }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>
                                 <option value="">-- Sélectionner --</option>
                                 {% for option in variable.options %}
-                                    <option value="{{ option }}">{{ option }}</option>
+                                    <option value="{{ option }}" {{ (oldData[variable.name] ?? '') == option ? 'selected' : '' }}>{{ option }}</option>
                                 {% endfor %}
                             </select>
+
                         {% else %}
                             <input type="text" name="{{ variable.name }}" id="{{ variable.name }}"
+                                value="{{ oldData[variable.name] ?? '' }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 {% if variable.required %}required{% endif %}>
                         {% endif %}
                     </div>
-                {% else %}
-                    <p class="text-gray-500 italic">Ce template n'a pas de variables à remplir.</p>
                 {% endfor %}
-                
+
                 <div class="pt-4 flex gap-4">
                     <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition cursor-pointer">
                         Générer le document
                     </button>
-                    <a href="{{ path('app_template_show', {id: template.id}) }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition">
+                    <a href="{{ path('app_template_index') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition">
                         Annuler
                     </a>
                 </div>
             </form>
-        </div>
-    </div>
-    
-    <!-- Aperçu du template -->
-    <div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Aperçu du template</h3>
-            <div class="bg-gray-50 p-4 rounded border text-sm">
-                <pre class="whitespace-pre-wrap font-mono text-xs">{{ template.bodyMarkdown }}</pre>
-            </div>
-        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -127,18 +127,58 @@ class TemplateController extends AbstractController
 
     private function extractVariables(string $markdown): array
     {
-        preg_match_all('/\{\{(\w+)\}\}/', $markdown, $matches);
-        $variables = [];
+        // Capture {{nom}}, {{nom:type}} ou {{nom:select:opt1,opt2,opt3}}
+        preg_match_all('/\{\{(\w+)(?::(\w+))?(?::([^}]+))?\}\}/', $markdown, $matches, PREG_SET_ORDER);
 
-        foreach (array_unique($matches[1]) as $varName) {
-            $variables[] = [
+        $variables = [];
+        $seen = [];
+
+        foreach ($matches as $match) {
+            $varName = $match[1];
+
+            // Éviter les doublons
+            if (in_array($varName, $seen)) {
+                continue;
+            }
+            $seen[] = $varName;
+
+            // Type explicite ou déduit du nom
+            $type = $match[2] ?? $this->guessType($varName);
+
+            $variable = [
                 'name' => $varName,
                 'label' => ucfirst(str_replace('_', ' ', $varName)),
-                'type' => 'text',
+                'type' => $type,
                 'required' => true,
             ];
+
+            // Options pour le select
+            if ($type === 'select' && isset($match[3])) {
+                $variable['options'] = array_map('trim', explode(',', $match[3]));
+            }
+
+            $variables[] = $variable;
         }
 
         return $variables;
+    }
+
+    private function guessType(string $varName): string
+    {
+        // Deviner le type selon le nom de la variable
+        if (str_contains($varName, 'date')) {
+            return 'date';
+        }
+        if (str_contains($varName, 'email')) {
+            return 'email';
+        }
+        if (str_contains($varName, 'montant') || str_contains($varName, 'capital') || str_contains($varName, 'prix') || str_contains($varName, 'tarif') || str_contains($varName, 'duree') || str_contains($varName, 'nombre') || str_contains($varName, 'quantite')) {
+            return 'number';
+        }
+        if (str_contains($varName, 'adresse') || str_contains($varName, 'description') || str_contains($varName, 'objet') || str_contains($varName, 'commentaire')) {
+            return 'textarea';
+        }
+
+        return 'text';
     }
 }

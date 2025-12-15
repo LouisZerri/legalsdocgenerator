@@ -101,7 +101,7 @@
 
 					<form action="{{ path('app_template_delete', {id: template.id}) }}" method="post" onsubmit="return confirm('Supprimer ce template ?')">
 						<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ template.id) }}">
-						<button type="submit" class="w-full text-center bg-red-100 text-red-700 px-4 py-2 rounded-md hover:bg-red-200 transition">
+						<button type="submit" class="w-full text-center bg-red-100 text-red-700 px-4 py-2 rounded-md hover:bg-red-200 transition cursor-pointer">
 							Supprimer
 						</button>
 					</form>
